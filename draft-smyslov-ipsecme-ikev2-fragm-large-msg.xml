@@ -22,8 +22,19 @@
                 <email>svan@elvis.ru</email>
             </address>
         </author>
-        <date/>
-
+        <author initials='A.' surname='Antony' fullname='Antony Antony'>
+            <organization abbrev="secunet">secunet Security    Networks AG</organization>
+            <address><email>antony.antony@secunet.com</email></address>
+        </author>
+        <author initials='S.' surname='Klassert' fullname='Steffen Klassert'>
+           <organization abbrev="secunet">secunet        Security Networks AG</organization>
+           <address><email>steffen.klassert@secunet.com</email></address>
+        </author>
+        <author initials='T.' surname='Brunner' fullname='Tobias Brunner'>
+            <organization abbrev="">codelabs GmbH</organization>
+            <address><email>tobias@codelabs.ch</email></address>
+        </author>
+        <date />
         <abstract>
             <t> This document describes describes issues with using Internet Key Exchange version 2 (IKEv2) fragmentation
             for transmitting large messages on unreliable transport. The document proposes several approaches
