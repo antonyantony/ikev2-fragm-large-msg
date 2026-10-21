@@ -1,0 +1,66 @@
+name: Generate Dynamic Pages
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - .gitignore
+      - README.md
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - .gitignore
+      - README.md
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: "Build Editor's Copy"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Set up build environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential git libxml2-utils python3-pip pandoc
+        sudo pip install xml2rfc
+
+    - name: Generate Draft in html txt and xml
+      run: make
+
+    - name: Prepare Deployment Directory
+      run: |
+        mkdir -p deploy
+        cp draft/draft-*latest*.html draft/draft-*latest*.txt draft/draft-*latest*.xml deploy/
+        cp README.md deploy/
+
+    - name: Convert README.md to index.html
+      run: pandoc README.md -o deploy/index.html
+
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v4
+      with:
+        path: deploy
+
+  deploy:
+    name: "Deploy to GitHub Pages"
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
