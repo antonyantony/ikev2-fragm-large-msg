@@ -166,7 +166,7 @@
 
                         <t> If the selective retransmission of fragments is negotiated, the maximum number of fragments that an IKEv2 sender 
                         can fragment an IKE message to, is limited to 65534, because the value 65535 (0xffff) 
-                        in the Total Fragments field of the Encrypted Fragment Payload (Section 2.5 of <xref target="RFC7383" />) is used
+                        in the Fragment Number field of the Encrypted Fragment Payload (Section 2.5 of <xref target="RFC7383" />) is used
                         as an indication that this is not a fragment, but instead a Receipt Status message (<xref target="receipt-status-msg" />).
                         </t>
 
@@ -208,7 +208,9 @@
                             </li>
                             <li> The Fragment Number field is set to 0xffff.
                             </li>
-                            <li> The Total Fragments field is set to 0xffff.
+                            <li> The Total Fragments field is set to the value of the Total Fragments field in the Encrypted Fragment
+                            payloads of the message being acknowledged, i.e. the message the sender of the Receipt Status Message
+                            is receiving from its peer (not the number of fragments of any message it sends itself).
                             </li>
                             <li> The Encrypted content field contains the information about the missing fragments represented
                             in the form defined in <xref target="receipt-status-data" />.
@@ -217,8 +219,14 @@
                         All other fields are filled in accordance with <xref target="RFC7383" /> and <xref target="RFC7296" />.
                         </t>
 
-                        <t> If the peers negotiated this extension, the receiver will recognize that this message contains the receipt status data.
-                        If the message is successfully decrypted and verified, then the receiver extracts 
+                        <t> If the peers negotiated this extension, the receiver will recognize that this message contains the receipt status data
+                        by the Fragment Number field being 0xffff. In this case the receiver <bcp14>MUST</bcp14> compare the value in the Total Fragments field
+                        with the value in the Total Fragments field of the Encrypted Fragment payloads it most recently sent for this exchange and
+                        <bcp14>MUST</bcp14> silently ignore the message if they differ. This check does not require decryption and thus
+                        can be performed before the ICV verification.
+                        </t>
+
+                        <t> If the message is successfully decrypted and verified, then the receiver extracts 
                         the receipt status data and obtains the information about the fragments that need to be retransmitted.
                         The receiver <bcp14>MUST</bcp14> ignore messages failed to pass the ICV verification.
                         </t>
@@ -231,14 +239,13 @@
                      1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Rcpt Status Packet Number   |       Total Fragments         |
+|   Rcpt Status Packet Number   |      First Fragment Num       |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|      First Fragment Num       |      Last Fragment Num        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      Last Fragment Num        |                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               ~
 ~                     Receipt Status Bitmap                     ~
-|               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|               |                                                 
-+-+-+-+-+-+-+-+-+
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                             ]]></artwork>
                         </figure>
 
@@ -250,22 +257,15 @@
                             packets with zero value <bcp14>MUST</bcp14> be ignored on receipt.
                             </li>
 
-                            <li>Total Fragments (2 octets, unsigned integer) -- when sending, this field <bcp14>MUST</bcp14> be set to the value from the 
-                            Total Fragments field in the Encrypted Fragment payloads (see Section 2.5 in <xref target="RFC7383" /> that the sender of this packet 
-                            currently uses to reconstruct the fragmented message. On receipr, if the value in this field 
-                            is not equal to the value in the Total Fragments field in the in the Encrypted Fragment payload most recently sent 
-                            to the peer, then this receipt status packet <bcp14>MUST</bcp14> be silently ignored.
-                            </li>
-
                             <li>First Fragment Num (2 octets, unsigned integer) -- the number of the fragment that corresponds to the first significant 
                             bit (the leftmost bit of the first octet) in the Receipt Status Bitmap. This field <bcp14>MUST NOT</bcp14> be zero and
-                            <bcp14>MUST NOT</bcp14> be greater than the value in the Total Fragments field. If these conditions are not met in the received packet, 
+                            <bcp14>MUST NOT</bcp14> be greater than the value in the Total Fragments field of the Encrypted Fragment payload. If these conditions are not met in the received packet, 
                             the packet <bcp14>MUST</bcp14> be silently discarded.
                             </li>
 
                             <li>Last Fragment Num (2 octets, unsigned integer) -- the number of the fragment that corresponds to the last significant bit
                             in the Receipt Status Bitmap.This field <bcp14>MUST NOT</bcp14> be zero, <bcp14>MUST NOT</bcp14> be smaller than the value
-                            in the First Fragment Num field and <bcp14>MUST NOT</bcp14> be greater than the value in the Total Fragments field. 
+                            in the First Fragment Num field and <bcp14>MUST NOT</bcp14> be greater than the value in the Total Fragments field of the Encrypted Fragment payload. 
                             If these conditions are not met in the received packet, the packet <bcp14>MUST</bcp14> be silently discarded.
                             </li>
 
