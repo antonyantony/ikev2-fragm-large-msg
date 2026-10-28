@@ -281,9 +281,28 @@
                     </section>
 
                     <section anchor="when" title="Implementation Details">
-                        <t>TBD. Should discuss when to send messages with receipt status data, how to handle them, how to keep
-                        these messages small when the number of fragments is large, how to cope with PMTU discovery, etc.
+                        <t> <em>When to send Receipt Status Messages.</em> The fragments of a message are normally sent
+                        back-to-back, so a peer that receives some but not all of them should not report after every fragment.
+                        It <bcp14>SHOULD</bcp14> wait until no new fragment has been received for a short quiet period and send a
+                        Receipt Status Message only if fragments are still missing at that time. This document does not mandate
+                        the length of the quiet period; it should be long enough to cover the burst of a sender and short
+                        compared to the retransmission timeout (for example, on the order of 25 ms), and it should be configurable.
+                        Since a sender may pace the fragments (see <xref target="rate"/>), an implementation may extend the quiet
+                        period to a small multiple of the largest gap seen between consecutive fragments of the message, and may
+                        send the first Receipt Status Message no later than a fixed deadline after the first fragment was received, so
+                        that a slowly arriving message cannot postpone it indefinitely.
+                        Receiving a fragment that was already received indicates that the sender retransmits, e.g. because a
+                        previous Receipt Status Message was lost, so another Receipt Status Message <bcp14>MAY</bcp14> be sent
+                        immediately.
+                        To limit the traffic and the processing overhead, a peer <bcp14>SHOULD NOT</bcp14> send more than
+                        one Receipt Status Message per quiet period for a message, and it <bcp14>MUST NOT</bcp14> send any after
+                        the message is complete or the exchange is finished.
                         </t>
+
+                        <t> <em>IV uniqueness.</em> If an implementation uses the Message ID (and the Fragment Number) as the source
+                        of the IV, it needs to take care, since multiple Receipt Status Messages are sent with the same Message ID.
+                        </t>
+
                     </section>
                 </section>
             </section>
