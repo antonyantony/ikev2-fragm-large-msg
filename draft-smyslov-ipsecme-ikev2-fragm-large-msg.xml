@@ -152,15 +152,15 @@
 
                     <section anchor="negotiation" title="Negotiation">
                         <t> <!-- No negotiation is required to use this extension. See <xref target="rationale" />. -->
-                        This extension is negotiated by exchanging a new notification SELECTIVE_FRAGMENT_RESEND_SUPPORTED in the IKE_SA_INIT exchange.
+                        This extension is negotiated by exchanging a new notification FRAGMENT_ACK_SUPPORTED in the IKE_SA_INIT exchange.
                         The Notify Message Type for this notification is &lt;TBA by IANA&gt;, Protocol ID and SPI Size are both set to 0 
                         and the notification data is empty. Future specifications may make use of the notification data of this notification.
 			            Implementations compliant with this document <bcp14>MUST</bcp14> ignore the content
-			            of the notification data in the received SELECTIVE_FRAGMENT_RESEND_SUPPORTED notification if it is not empty.
+			            of the notification data in the received FRAGMENT_ACK_SUPPORTED notification if it is not empty.
                         </t>
 
                         <t> The negotiation only takes effect if peers also negotiate the use of IKE fragmentation, as defined
-                        in Section 2.3 of <xref target="RFC7383" />. If IKE fragmentation is not negotiated, the SELECTIVE_FRAGMENT_RESEND_SUPPORTED notifications
+                        in Section 2.3 of <xref target="RFC7383" />. If IKE fragmentation is not negotiated, the FRAGMENT_ACK_SUPPORTED notifications
                         <bcp14>MUST</bcp14> be ignored.
                         </t>
 
@@ -300,7 +300,7 @@
 			the "Internet Key Exchange Version 2 (IKEv2) Parameters" registry group:</t>
             <figure align="center">
                 <artwork align="left"><![CDATA[
-TBA       SELECTIVE_FRAGMENT_RESEND_SUPPORTED
+TBA       FRAGMENT_ACK_SUPPORTED
                 ]]></artwork>
             </figure>
         </section>
